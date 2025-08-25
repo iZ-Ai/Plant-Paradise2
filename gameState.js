@@ -14,6 +14,11 @@ const GameState = {
             greenhouse: { level: 0, cost: 500, baseNectar: 8 },
             beehive: { level: 0, cost: 2000, baseNectar: 25 },
             mysticwell: { level: 0, cost: 10000, baseNectar: 75 }
+        },
+        idleUpgrades: {
+            clickPower: { level: 0 },
+            autoClicker: { level: 0 },
+            flowerPower: { level: 0 }
         }
     },
 
