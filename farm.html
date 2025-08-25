@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farm - Plant Paradise</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gradient-to-b from-green-50 to-blue-50 min-h-screen">
+    <div class="max-w-6xl mx-auto p-6">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-green-800 mb-2">Plant Paradise</h1>
+            <div class="flex justify-center items-center gap-4 mt-4">
+                <div class="bg-white rounded-lg px-4 py-2 shadow-md">
+                    <div class="flex items-center gap-2">
+                        <span class="icon text-blue-500">✨</span>
+                        <span class="font-bold text-lg" id="nectarDisplay">50 Nectar</span>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg px-4 py-2 shadow-md">
+                    <div class="flex items-center gap-2">
+                        <span class="icon text-yellow-500">⭐</span>
+                        <span class="font-bold text-lg" id="sunlightDisplay">0 Sunlight</span>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg px-4 py-2 shadow-md">
+                    <span class="font-bold text-lg text-green-600" id="nectarPerSecDisplay">+0/sec</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="bg-white rounded-xl shadow-lg mb-8 p-4">
+            <div class="flex justify-center gap-4">
+                <a href="index.html" class="nav-link">🏠 Home</a>
+                <a href="farm.html" class="nav-link active">🌱 Farm</a>
+                <a href="generators.html" class="nav-link">⚙️ Generators</a>
+                <a href="collection.html" class="nav-link">📚 Collection</a>
+                <a href="shop.html" class="nav-link">🛒 Shop</a>
+            </div>
+        </div>
+
+        <!-- Farm Content -->
+        <div class="bg-white rounded-xl shadow-lg mb-8 p-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Garden Plots -->
+                <div>
+                    <h2 class="text-2xl font-bold text-green-800 mb-4">Garden Plots</h2>
+                    <div class="grid grid-cols-4 gap-3 mb-4" id="gardenSlots"></div>
+                    <div class="text-sm text-gray-600 text-center">
+                        Plants grow over time. Ready plants appear in the harvest section!
+                    </div>
+                </div>
+
+                <!-- Ready to Harvest -->
+                <div>
+                    <h2 class="text-2xl font-bold text-yellow-800 mb-4">Ready to Harvest</h2>
+                    <div class="space-y-3 max-h-96 overflow-y-auto" id="harvestList"></div>
+                    <button id="harvestAllBtn" class="w-full mt-4 py-3 bg-yellow-500 hover:bg-yellow-600 text-white font-bold rounded-lg transition-colors hidden">
+                        Harvest All (0)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="shared.js"></script>
+    <script src="gameState.js"></script>
+    <script>
+        // Set active navigation
+        setActiveNav('farm');
+        
+        // Initialize auto-save
+        GameState.startAutoSave();
+
+        function updateFarmDisplay() {
+            const state = GameState.get();
+            
+            // Update garden slots
+            const slotsContainer = document.getElementById('gardenSlots');
+            slotsContainer.innerHTML = '';
+            
+            for (let i = 1; i <= 12; i++) {
+                const slot = state.activeSlots[i];
+                const slotDiv = document.createElement('div');
+                slotDiv.className = 'w-20 h-20 rounded-lg flex flex-col items-center justify-center transition-all relative overflow-hidden cursor-pointer';
+                
+                if (!slot) {
+                    slotDiv.className += ' bg-amber-100 border-2 border-dashed border-amber-300';
+                    slotDiv.innerHTML = '<span class="text-amber-400 text-2xl">+</span>';
+                    slotDiv.title = 'Empty plot - buy seed packs to plant here!';
+                } else {
+                    const plant = plantTypes[slot.type] || sunlightShop[slot.type];
+                    const progress = getGrowthProgress(slot);
+                    const ready = isReadyToHarvest(slot);
+                    const remainingTime = getRemainingTime(slot);
+                    
+                    slotDiv.className += ` ${plant.bgColor} ${ready ? 'animate-pulse ring-2 ring-yellow-400' : ''}`;
+                    slotDiv.title = ready ? `${plant.name} - Ready to harvest!` : `${plant.name} - Growing... ${formatTime(remainingTime)} remaining`;
+                    
+                    let innerHTML = `<span class="${plant.color} text-2xl ${ready ? 'animate-bounce' : ''}">${plant.icon}</span>`;
+                    
+                    if (!ready) {
+                        innerHTML += `
+                            <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-20 h-2">
+                                <div class="h-full bg-green-400 transition-all duration-1000" style="width: ${progress}%"></div>
+                            </div>
+                            <div class="text-xs text-white font-bold mt-1">${formatTime(remainingTime)}</div>
+                        `;
+                    } else {
+                        innerHTML += '<div class="text-xs font-bold text-yellow-200 animate-pulse">READY!</div>';
+                    }
+                    
+                    slotDiv.innerHTML = innerHTML;
+                }
+                
+                slotsContainer.appendChild(slotDiv);
+            }
+
+            // Update harvest list
+            const harvestList = document.getElementById('harvestList');
+            const readySlots = Object.entries(state.activeSlots).filter(([_, slot]) => isReadyToHarvest(slot));
+            
+            if (readySlots.length === 0) {
+                harvestList.innerHTML = '<div class="text-center text-gray-500 py-8">No plants ready to harvest yet. Check back soon!</div>';
+                document.getElementById('harvestAllBtn').classList.add('hidden');
+            } else {
+                harvestList.innerHTML = readySlots.map(([slotId, slot]) => {
+                    const plant = plantTypes[slot.type] || sunlightShop[slot.type];
+                    return `
+                        <div class="flex items-center gap-4 p-4 bg-yellow-50 rounded-lg border-2 border-yellow-200 hover:border-yellow-400 transition-all cursor-pointer" onclick="harvestPlant(${slotId})">
+                            <div class="${plant.bgColor} w-16 h-16 rounded-lg flex items-center justify-center animate-pulse">
+                                <span class="${plant.color} text-2xl">${plant.icon}</span>
+                            </div>
+                            <div class="flex-1">
+                                <div class="font-bold text-lg">${plant.name}</div>
+                                <div class="text-sm text-gray-600 capitalize">${plant.rarity}</div>
+                                <div class="text-lg font-bold text-yellow-600">+${plant.harvestReward} Nectar</div>
+                            </div>
+                            <div class="text-yellow-500 font-bold text-xl animate-bounce">READY!</div>
+                        </div>
+                    `;
+                }).join('');
+                
+                const harvestBtn = document.getElementById('harvestAllBtn');
+                harvestBtn.classList.remove('hidden');
+                harvestBtn.textContent = `Harvest All (${readySlots.length})`;
+            }
+        }
+
+        function harvestPlant(slotId) {
+            if (GameState.harvestPlant(slotId)) {
+                updateFarmDisplay();
+                updateHeader();
+            }
+        }
+
+        function harvestAll() {
+            const harvested = GameState.harvestAll();
+            if (harvested > 0) {
+                updateFarmDisplay();
+                updateHeader();
+            }
+        }
+
+        // Event listeners
+        document.getElementById('harvestAllBtn').addEventListener('click', harvestAll);
+
+        // Update display every second for timers
+        setInterval(() => {
+            updateFarmDisplay();
+            updateHeader();
+        }, 1000);
+
+        // Initial display
+        updateFarmDisplay();
+        updateHeader();
+    </script>
+</body>
+</html>
