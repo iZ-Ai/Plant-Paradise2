@@ -81,6 +81,21 @@ const GameState = {
             }
         });
         
+        // Nectar from idle upgrades (auto-clicker)
+        if (state.idleUpgrades && state.idleUpgrades.autoClicker.level > 0) {
+            const baseRate = 0.5; // From idle upgrade definition
+            const autoLevel = state.idleUpgrades.autoClicker.level;
+            const flowerLevel = state.idleUpgrades.flowerPower.level;
+            const multiplier = Math.pow(1.5, flowerLevel);
+            
+            // Calculate click reward
+            const basePower = 1;
+            const clickLevel = state.idleUpgrades.clickPower.level;
+            const clickReward = Math.floor((basePower + clickLevel * 2) * multiplier);
+            
+            total += baseRate * autoLevel * clickReward;
+        }
+        
         return total;
     },
 
@@ -236,12 +251,20 @@ const GameState = {
 
     // Auto-save and nectar generation
     startAutoSave() {
-        setInterval(() => {
+        if (this.autoSaveInterval) {
+            clearInterval(this.autoSaveInterval);
+        }
+        
+        this.autoSaveInterval = setInterval(() => {
             const nectarGain = this.getTotalNectarPerSecond();
             if (nectarGain > 0) {
                 const state = this.get();
                 this.update({ nectar: state.nectar + nectarGain });
-                updateHeader();
+                
+                // Update header if function exists
+                if (typeof updateHeader === 'function') {
+                    updateHeader();
+                }
             }
         }, 1000);
     },
