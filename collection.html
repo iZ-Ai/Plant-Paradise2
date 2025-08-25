@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collection - Plant Paradise</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gradient-to-b from-green-50 to-blue-50 min-h-screen">
+    <div class="max-w-6xl mx-auto p-6">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-green-800 mb-2">Plant Paradise</h1>
+            <div class="flex justify-center items-center gap-4 mt-4">
+                <div class="bg-white rounded-lg px-4 py-2 shadow-md">
+                    <div class="flex items-center gap-2">
+                        <span class="icon text-blue-500">✨</span>
+                        <span class="font-bold text-lg" id="nectarDisplay">50 Nectar</span>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg px-4 py-2 shadow-md">
+                    <div class="flex items-center gap-2">
+                        <span class="icon text-yellow-500">⭐</span>
+                        <span class="font-bold text-lg" id="sunlightDisplay">0 Sunlight</span>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg px-4 py-2 shadow-md">
+                    <span class="font-bold text-lg text-green-600" id="nectarPerSecDisplay">+0/sec</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="bg-white rounded-xl shadow-lg mb-8 p-4">
+            <div class="flex justify-center gap-4">
+                <a href="index.html" class="nav-link">🏠 Home</a>
+                <a href="farm.html" class="nav-link">🌱 Farm</a>
+                <a href="generators.html" class="nav-link">⚙️ Generators</a>
+                <a href="collection.html" class="nav-link active">📚 Collection</a>
+                <a href="shop.html" class="nav-link">🛒 Shop</a>
+            </div>
+        </div>
+
+        <!-- Collection Content -->
+        <div class="bg-white rounded-xl shadow-lg mb-8 p-6">
+            <h2 class="text-2xl font-bold text-blue-800 mb-4">Plant Collection</h2>
+            
+            <!-- Collection Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-gray-50 rounded-lg p-4 text-center">
+                    <div class="text-2xl font-bold text-gray-600" id="commonCount">0</div>
+                    <div class="text-sm text-gray-500">Common Plants</div>
+                </div>
+                <div class="bg-green-50 rounded-lg p-4 text-center">
+                    <div class="text-2xl font-bold text-green-600" id="uncommonCount">0</div>
+                    <div class="text-sm text-gray-500">Uncommon Plants</div>
+                </div>
+                <div class="bg-blue-50 rounded-lg p-4 text-center">
+                    <div class="text-2xl font-bold text-blue-600" id="rareCount">0</div>
+                    <div class="text-sm text-gray-500">Rare Plants</div>
+                </div>
+                <div class="bg-purple-50 rounded-lg p-4 text-center">
+                    <div class="text-2xl font-bold text-purple-600" id="legendaryCount">0</div>
+                    <div class="text-sm text-gray-500">Legendary+ Plants</div>
+                </div>
+            </div>
+            
+            <!-- Filter Buttons -->
+            <div class="flex flex-wrap justify-center gap-2 mb-6">
+                <button onclick="filterCollection('all')" class="filter-btn active px-4 py-2 rounded-lg font-medium transition-colors bg-blue-500 text-white">All</button>
+                <button onclick="filterCollection('common')" class="filter-btn px-4 py-2 rounded-lg font-medium transition-colors bg-gray-200 text-gray-700 hover:bg-gray-300">Common</button>
+                <button onclick="filterCollection('uncommon')" class="filter-btn px-4 py-2 rounded-lg font-medium transition-colors bg-gray-200 text-gray-700 hover:bg-gray-300">Uncommon</button>
+                <button onclick="filterCollection('rare')" class="filter-btn px-4 py-2 rounded-lg font-medium transition-colors bg-gray-200 text-gray-700 hover:bg-gray-300">Rare</button>
+                <button onclick="filterCollection('legendary')" class="filter-btn px-4 py-2 rounded-lg font-medium transition-colors bg-gray-200 text-gray-700 hover:bg-gray-300">Legendary</button>
+                <button onclick="filterCollection('mythical')" class="filter-btn px-4 py-2 rounded-lg font-medium transition-colors bg-gray-200 text-gray-700 hover:bg-gray-300">Mythical</button>
+            </div>
+            
+            <!-- Plant Grid -->
+            <div id="collectionGrid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
+        </div>
+    </div>
+
+    <script src="shared.js"></script>
+    <script src="gameState.js"></script>
+    <script>
+        // Set active navigation
+        setActiveNav('collection');
+        
+        // Initialize auto-save
+        GameState.startAutoSave();
+        
+        let currentFilter = 'all';
+
+        function updateCollectionDisplay() {
+            const state = GameState.get();
+            const collectionGrid = document.getElementById('collectionGrid');
+            
+            // Count plants by rarity
+            let rarityCounts = { common: 0, uncommon: 0, rare: 0, legendary: 0, mythical: 0 };
+            
+            if (Object.keys(state.plantCollection).length === 0) {
+                collectionGrid.innerHTML = '<p class="text-gray-500 text-center py-8 col-span-full">No plants collected yet. Open some seed packs!</p>';
+            } else {
+                const filteredPlants = Object.entries(state.plantCollection)
+                    .sort(([,a], [,b]) => b - a)
+                    .filter(([type]) => {
+                        const plant = plantTypes[type] || sunlightShop[type];
+                        if (!plant) return false;
+                        
+                        // Count for stats
+                        rarityCounts[plant.rarity] += 1;
+                        
+                        // Filter by current selection
+                        return currentFilter === 'all' || plant.rarity === currentFilter;
+                    });
+                
+                collectionGrid.innerHTML = filteredPlants.map(([type, count]) => {
+                    const plant = plantTypes[type] || sunlightShop[type];
+                    if (!plant) return '';
+                    return `
+                        <div class="${plant.bgColor} rounded-lg p-4 text-center transition-all hover:scale-105 cursor-pointer" 
+                             title="${plant.name} - ${plant.rarity} - Growth time: ${formatTime(plant.growthTime)} - Harvest: ${plant.harvestReward} nectar">
+                            <span class="${plant.color} text-2xl block mb-2">${plant.icon}</span>
+                            <div class="font-semibold text-white text-sm">${plant.name}</div>
+                            <div class="text-lg font-bold text-white">×${count}</div>
+                            <div class="text-xs text-white opacity-75 capitalize">${plant.rarity}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            
+            // Update rarity counts
+            document.
