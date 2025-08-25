@@ -97,6 +97,11 @@
                     Shop
                     <div class="text-xs opacity-75">Buy seeds</div>
                 </a>
+                <a href="prestige.html" class="nav-link">
+                    <span class="text-2xl mb-2 block">💎</span>
+                    Prestige
+                    <div class="text-xs opacity-75" id="prestigeStatus">0 points</div>
+                </a>
             </div>
             
             <!-- Quick Status Overview -->
@@ -303,10 +308,12 @@
             const generatorNectar = Object.values(state.generators).reduce((sum, gen) => sum + (gen.baseNectar * gen.level), 0);
             const totalPlants = GameState.getTotalPlantsCollected();
             const activeGenerators = Object.values(state.generators).filter(gen => gen.level > 0).length;
+            const prestigePoints = state.prestigePoints || 0;
             
             document.getElementById('farmStatus').textContent = `${readyCount} ready`;
             document.getElementById('generatorStatus').textContent = `+${generatorNectar}/sec`;
             document.getElementById('collectionStatus').textContent = `${totalPlants} plants`;
+            document.getElementById('prestigeStatus').textContent = `${prestigePoints} points`;
             
             document.getElementById('totalPlantsDisplay').textContent = totalPlants;
             document.getElementById('totalGeneratorsDisplay').textContent = activeGenerators;
