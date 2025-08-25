@@ -83,13 +83,43 @@
             </div>
         </div>
 
+        <!-- Idle Nectar Collector -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h2 class="text-2xl font-bold text-green-800 mb-4">Idle Nectar Collection</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-gradient-to-r from-blue-50 to-green-50 rounded-lg p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-xl font-bold text-green-700">Click for Nectar!</h3>
+                            <p class="text-sm text-gray-600">Click the flower to collect nectar</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-lg font-bold text-blue-600" id="clickReward">+1 per click</div>
+                            <div class="text-sm text-gray-500">Auto: +<span id="autoClickRate">0</span>/sec</div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <button id="nectarCollector" class="w-32 h-32 bg-gradient-to-r from-pink-400 to-purple-500 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 active:scale-95">
+                            <span class="text-6xl">🌸</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="space-y-4">
+                    <h3 class="text-lg font-bold text-purple-700">Idle Upgrades</h3>
+                    <div id="idleUpgrades" class="space-y-3"></div>
+                </div>
+            </div>
+        </div>
+
         <!-- Game Tips -->
         <div class="bg-white rounded-xl shadow-lg p-6">
             <h2 class="text-2xl font-bold text-green-800 mb-4">How to Play</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="bg-green-50 rounded-lg p-4">
                     <h3 class="font-bold text-green-700 mb-2">🌱 Getting Started</h3>
-                    <p class="text-sm text-gray-600">Start by buying seed packs in the Shop. Plants will automatically be planted and begin growing!</p>
+                    <p class="text-sm text-gray-600">Click the flower above for instant nectar, then buy seed packs in the Shop!</p>
                 </div>
                 <div class="bg-blue-50 rounded-lg p-4">
                     <h3 class="font-bold text-blue-700 mb-2">⏰ Growing & Harvesting</h3>
@@ -97,11 +127,11 @@
                 </div>
                 <div class="bg-purple-50 rounded-lg p-4">
                     <h3 class="font-bold text-purple-700 mb-2">⚙️ Passive Income</h3>
-                    <p class="text-sm text-gray-600">Build Generators for automatic nectar production. Upgrade them to increase efficiency!</p>
+                    <p class="text-sm text-gray-600">Build Generators and idle upgrades for automatic nectar production!</p>
                 </div>
                 <div class="bg-yellow-50 rounded-lg p-4">
                     <h3 class="font-bold text-yellow-700 mb-2">⭐ Milestones</h3>
-                    <p class="text-sm text-gray-600">Collect plants to reach milestones and earn Sunlight for premium plants in the Shop!</p>
+                    <p class="text-sm text-gray-600">Collect plants to reach milestones and earn Sunlight for premium plants!</p>
                 </div>
             </div>
         </div>
@@ -113,6 +143,155 @@
         // Initialize game state
         GameState.startAutoSave();
         
+        // Idle upgrade definitions
+        const idleUpgrades = {
+            clickPower: { 
+                name: 'Click Power', 
+                baseReward: 1, 
+                baseCost: 15, 
+                level: 0, 
+                maxLevel: 20,
+                description: 'Increases nectar per click',
+                icon: '👆'
+            },
+            autoClicker: { 
+                name: 'Auto Clicker', 
+                baseRate: 0.5, 
+                baseCost: 50, 
+                level: 0, 
+                maxLevel: 15,
+                description: 'Automatically clicks for you',
+                icon: '🤖'
+            },
+            flowerPower: { 
+                name: 'Flower Power', 
+                multiplier: 1.5, 
+                baseCost: 200, 
+                level: 0, 
+                maxLevel: 10,
+                description: 'Multiplies all idle income',
+                icon: '🌺'
+            }
+        };
+
+        function getIdleUpgrades() {
+            const state = GameState.get();
+            return state.idleUpgrades || {
+                clickPower: { level: 0 },
+                autoClicker: { level: 0 },
+                flowerPower: { level: 0 }
+            };
+        }
+
+        function updateIdleUpgrades(upgrades) {
+            const state = GameState.get();
+            GameState.update({ idleUpgrades: upgrades });
+        }
+
+        function getClickReward() {
+            const upgrades = getIdleUpgrades();
+            const basePower = idleUpgrades.clickPower.baseReward;
+            const clickLevel = upgrades.clickPower.level;
+            const flowerLevel = upgrades.flowerPower.level;
+            const multiplier = Math.pow(idleUpgrades.flowerPower.multiplier, flowerLevel);
+            return Math.floor((basePower + clickLevel * 2) * multiplier);
+        }
+
+        function getAutoClickRate() {
+            const upgrades = getIdleUpgrades();
+            const baseRate = idleUpgrades.autoClicker.baseRate;
+            const autoLevel = upgrades.autoClicker.level;
+            const flowerLevel = upgrades.flowerPower.level;
+            const multiplier = Math.pow(idleUpgrades.flowerPower.multiplier, flowerLevel);
+            return (baseRate * autoLevel * multiplier).toFixed(1);
+        }
+
+        function getUpgradeCost(upgradeType) {
+            const upgrades = getIdleUpgrades();
+            const upgrade = idleUpgrades[upgradeType];
+            const level = upgrades[upgradeType].level;
+            return Math.floor(upgrade.baseCost * Math.pow(1.5, level));
+        }
+
+        function buyUpgrade(upgradeType) {
+            const state = GameState.get();
+            const upgrades = getIdleUpgrades();
+            const cost = getUpgradeCost(upgradeType);
+            
+            if (state.nectar >= cost && upgrades[upgradeType].level < idleUpgrades[upgradeType].maxLevel) {
+                GameState.update({ nectar: state.nectar - cost });
+                upgrades[upgradeType].level++;
+                updateIdleUpgrades(upgrades);
+                updateIdleDisplay();
+                showFloatingText('+1 Level!', 'text-purple-600');
+            }
+        }
+
+        function showFloatingText(text, colorClass = 'text-green-600') {
+            const floatingText = document.createElement('div');
+            floatingText.className = `absolute top-0 left-1/2 transform -translate-x-1/2 pointer-events-none font-bold text-lg ${colorClass} animate-bounce`;
+            floatingText.style.zIndex = '1000';
+            floatingText.textContent = text;
+            
+            const collector = document.getElementById('nectarCollector');
+            collector.parentElement.style.position = 'relative';
+            collector.parentElement.appendChild(floatingText);
+            
+            setTimeout(() => {
+                if (floatingText.parentNode) {
+                    floatingText.parentNode.removeChild(floatingText);
+                }
+            }, 1000);
+        }
+
+        function collectNectar() {
+            const reward = getClickReward();
+            const state = GameState.get();
+            GameState.update({ nectar: state.nectar + reward });
+            showFloatingText(`+${reward}`);
+            updateStatusDisplays();
+        }
+
+        function updateIdleDisplay() {
+            const upgrades = getIdleUpgrades();
+            const clickReward = getClickReward();
+            const autoRate = getAutoClickRate();
+            
+            document.getElementById('clickReward').textContent = `+${clickReward} per click`;
+            document.getElementById('autoClickRate').textContent = autoRate;
+            
+            const upgradesContainer = document.getElementById('idleUpgrades');
+            upgradesContainer.innerHTML = Object.entries(idleUpgrades).map(([key, upgrade]) => {
+                const currentLevel = upgrades[key].level;
+                const cost = getUpgradeCost(key);
+                const state = GameState.get();
+                const canAfford = state.nectar >= cost;
+                const maxedOut = currentLevel >= upgrade.maxLevel;
+                
+                return `
+                    <div class="bg-gray-50 rounded-lg p-3 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">${upgrade.icon}</span>
+                            <div>
+                                <h4 class="font-bold text-sm">${upgrade.name}</h4>
+                                <p class="text-xs text-gray-600">${upgrade.description}</p>
+                                <p class="text-xs font-medium">Level ${currentLevel}/${upgrade.maxLevel}</p>
+                            </div>
+                        </div>
+                        <button onclick="buyUpgrade('${key}')" 
+                                ${!canAfford || maxedOut ? 'disabled' : ''}
+                                class="px-3 py-1 rounded text-sm font-bold transition-all ${
+                                    maxedOut ? 'bg-green-200 text-green-700 cursor-default' : 
+                                    canAfford ? 'bg-purple-500 hover:bg-purple-600 text-white cursor-pointer' : 
+                                    'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                }">
+                            ${maxedOut ? 'MAX' : `${cost} Nectar`}
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
         function updateStatusDisplays() {
             const state = GameState.get();
             const readyCount = Object.values(state.activeSlots).filter(slot => isReadyToHarvest(slot)).length;
@@ -129,7 +308,23 @@
             document.getElementById('readyHarvestDisplay').textContent = readyCount;
             
             updateHeader();
+            updateIdleDisplay();
         }
+
+        // Auto-clicker functionality
+        setInterval(() => {
+            const autoRate = parseFloat(getAutoClickRate());
+            if (autoRate > 0) {
+                const reward = Math.floor(getClickReward() * autoRate);
+                if (reward > 0) {
+                    const state = GameState.get();
+                    GameState.update({ nectar: state.nectar + reward });
+                }
+            }
+        }, 1000);
+
+        // Event listeners
+        document.getElementById('nectarCollector').addEventListener('click', collectNectar);
         
         // Update displays every second
         setInterval(updateStatusDisplays, 1000);
