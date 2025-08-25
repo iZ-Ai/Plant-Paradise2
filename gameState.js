@@ -19,6 +19,15 @@ const GameState = {
             clickPower: { level: 0 },
             autoClicker: { level: 0 },
             flowerPower: { level: 0 }
+        },
+        prestigePoints: 0,
+        prestigeUpgrades: {
+            nectarMultiplier: { level: 0 },
+            clickBoost: { level: 0 },
+            generatorBoost: { level: 0 },
+            plantGrowth: { level: 0 },
+            autoHarvest: { level: 0 },
+            sunlightBonus: { level: 0 }
         }
     },
 
