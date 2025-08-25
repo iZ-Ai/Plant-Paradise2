@@ -1,238 +1,189 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shop - Plant Paradise</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body class="bg-gradient-to-b from-green-50 to-blue-50 min-h-screen">
-    <div class="max-w-6xl mx-auto p-6">
-        <!-- Header -->
-        <div class="text-center mb-8">
-            <div class="flex justify-center items-center gap-4 mb-2">
-                <h1 class="text-4xl font-bold text-green-800">Plant Paradise</h1>
-                <button id="shopInfoBtn" class="w-8 h-8 bg-blue-500 hover:bg-blue-600 text-white rounded-full text-sm font-bold transition-all cursor-pointer flex items-center justify-center" title="Shop Information">
-                    i
-                </button>
-            </div>
-            <div class="flex justify-center items-center gap-4 mt-4">
-                <div class="bg-white rounded-lg px-4 py-2 shadow-md">
-                    <div class="flex items-center gap-2">
-                        <span class="icon text-blue-500">✨</span>
-                        <span class="font-bold text-lg" id="nectarDisplay">50 Nectar</span>
-                    </div>
-                </div>
-                <div class="bg-white rounded-lg px-4 py-2 shadow-md">
-                    <div class="flex items-center gap-2">
-                        <span class="icon text-yellow-500">⭐</span>
-                        <span class="font-bold text-lg" id="sunlightDisplay">0 Sunlight</span>
-                    </div>
-                </div>
-                <div class="bg-white rounded-lg px-4 py-2 shadow-md">
-                    <span class="font-bold text-lg text-green-600" id="nectarPerSecDisplay">+0/sec</span>
-                </div>
-            </div>
-        </div>
+// Plant Data
+const plantTypes = {
+    daisy: { name: 'Daisy', icon: '🌼', rarity: 'common', color: 'text-white', bgColor: 'bg-gray-400', growthTime: 10000, harvestReward: 15 },
+    grass: { name: 'Grass', icon: '🌱', rarity: 'common', color: 'text-white', bgColor: 'bg-gray-500', growthTime: 8000, harvestReward: 12 },
+    clover: { name: 'Clover', icon: '🍀', rarity: 'common', color: 'text-white', bgColor: 'bg-gray-600', growthTime: 12000, harvestReward: 20 },
+    sunflower: { name: 'Sunflower', icon: '🌻', rarity: 'uncommon', color: 'text-white', bgColor: 'bg-green-500', growthTime: 20000, harvestReward: 50 },
+    rose: { name: 'Rose', icon: '🌹', rarity: 'uncommon', color: 'text-white', bgColor: 'bg-green-600', growthTime: 25000, harvestReward: 65 },
+    oak: { name: 'Oak Tree', icon: '🌳', rarity: 'rare', color: 'text-white', bgColor: 'bg-blue-500', growthTime: 45000, harvestReward: 180 },
+    lotus: { name: 'Lotus', icon: '🪷', rarity: 'rare', color: 'text-white', bgColor: 'bg-blue-600', growthTime: 50000, harvestReward: 220 },
+    phoenix: { name: 'Phoenix Flower', icon: '⚡', rarity: 'legendary', color: 'text-white', bgColor: 'bg-purple-600', growthTime: 90000, harvestReward: 500 },
+    celestial: { name: 'Celestial Bloom', icon: '✨', rarity: 'mythical', color: 'text-white', bgColor: 'gradient-bg-2', growthTime: 180000, harvestReward: 1500 }
+};
 
-        <!-- Shop Info Modal -->
-        <div id="shopInfoModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-            <div class="bg-white rounded-xl shadow-2xl p-6 max-w-4xl mx-4 max-h-96 overflow-y-auto">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-bold text-gray-800">Shop Information</h2>
-                    <button id="closeShopInfo" class="text-gray-500 hover:text-gray-700 text-2xl font-bold">&times;</button>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-green-50 rounded-lg p-4">
-                        <h4 class="font-bold text-green-700 mb-2">💰 Seed Pack Tips</h4>
-                        <ul class="text-sm text-gray-600 space-y-1">
-                            <li>• Basic packs give common plants</li>
-                            <li>• Premium packs have better rarity rates</li>
-                            <li>• Legendary packs guarantee rare+ plants</li>
-                            <li>• Plants are automatically planted in empty slots</li>
-                        </ul>
-                    </div>
-                    <div class="bg-yellow-50 rounded-lg p-4">
-                        <h4 class="font-bold text-yellow-700 mb-2">⭐ Sunlight System</h4>
-                        <ul class="text-sm text-gray-600 space-y-1">
-                            <li>• Earn sunlight by reaching plant milestones</li>
-                            <li>• Sunlight plants have unique appearances</li>
-                            <li>• Premium plants give more nectar</li>
-                            <li>• Limited selection but guaranteed quality</li>
-                        </ul>
-                    </div>
-                </div>
-                
-                <div class="mt-6 bg-blue-50 rounded-lg p-4">
-                    <h4 class="font-bold text-blue-700 mb-2">🎯 Rarity Guide</h4>
-                    <div class="grid grid-cols-2 md:grid-cols-5 gap-2 text-sm">
-                        <div class="text-center">
-                            <div class="text-gray-600 font-medium">Common</div>
-                            <div class="text-xs text-gray-500">Basic plants</div>
-                        </div>
-                        <div class="text-center">
-                            <div class="text-green-600 font-medium">Uncommon</div>
-                            <div class="text-xs text-gray-500">Better rewards</div>
-                        </div>
-                        <div class="text-center">
-                            <div class="text-blue-600 font-medium">Rare</div>
-                            <div class="text-xs text-gray-500">Great rewards</div>
-                        </div>
-                        <div class="text-center">
-                            <div class="text-purple-600 font-medium">Legendary</div>
-                            <div class="text-xs text-gray-500">Amazing rewards</div>
-                        </div>
-                        <div class="text-center">
-                            <div class="text-yellow-600 font-medium">Mythical</div>
-                            <div class="text-xs text-gray-500">Ultimate plants</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+const seedPacks = {
+    basic: { name: 'Basic Seed Pack', cost: 10, icon: '📦', color: 'text-gray-600', rarityRates: { common: 85, uncommon: 15, rare: 0, legendary: 0, mythical: 0 } },
+    premium: { name: 'Premium Seed Pack', cost: 50, icon: '📦', color: 'text-green-600', rarityRates: { common: 60, uncommon: 25, rare: 10, legendary: 4, mythical: 1 } },
+    legendary: { name: 'Legendary Seed Pack', cost: 1000, icon: '👑', color: 'text-purple-600', rarityRates: { common: 0, uncommon: 25, rare: 50, legendary: 20, mythical: 5 } }
+};
 
-        <!-- Navigation -->
-        <div class="bg-white rounded-xl shadow-lg mb-8 p-4">
-            <div class="flex justify-center gap-4">
-                <a href="index.html" class="nav-link">🏠 Home</a>
-                <a href="farm.html" class="nav-link">🌱 Farm</a>
-                <a href="generators.html" class="nav-link">⚙️ Generators</a>
-                <a href="collection.html" class="nav-link">📚 Collection</a>
-                <a href="shop.html" class="nav-link active">🛒 Shop</a>
-            </div>
-        </div>
+const generatorTypes = {
+    sprinkler: { name: 'Garden Sprinkler', icon: '💧', description: 'Automatically waters plants for extra nectar', color: 'text-blue-600', bgColor: 'bg-blue-100' },
+    greenhouse: { name: 'Mini Greenhouse', icon: '🏠', description: 'Controlled environment boosts nectar production', color: 'text-green-600', bgColor: 'bg-green-100' },
+    beehive: { name: 'Magical Beehive', icon: '🐝', description: 'Bees pollinate plants for premium nectar', color: 'text-yellow-600', bgColor: 'bg-yellow-100' },
+    mysticwell: { name: 'Mystic Well', icon: '🔮', description: 'Ancient magic continuously generates pure nectar', color: 'text-purple-600', bgColor: 'bg-purple-100' }
+};
 
-        <!-- Shop Content -->
-        <div class="bg-white rounded-xl shadow-lg mb-8 p-6">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <!-- Seed Packs -->
-                <div>
-                    <h2 class="text-2xl font-bold text-green-800 mb-4">Seed Packs</h2>
-                    <p class="text-gray-600 mb-6">Purchase seed packs to get random plants for your garden!</p>
-                    <div class="space-y-4" id="seedPacksList"></div>
-                </div>
+const sunlightShop = {
+    golden_daisy: { name: 'Golden Daisy', icon: '⭐', rarity: 'legendary', color: 'text-white', bgColor: 'gradient-bg-1', growthTime: 15000, harvestReward: 150, sunlightCost: 5 },
+    rainbow_rose: { name: 'Rainbow Rose', icon: '🌈', rarity: 'mythical', color: 'text-white', bgColor: 'gradient-bg-3', growthTime: 45000, harvestReward: 400, sunlightCost: 15 },
+    starfruit_tree: { name: 'Starfruit Tree', icon: '👑', rarity: 'mythical', color: 'text-white', bgColor: 'gradient-bg-4', growthTime: 60000, harvestReward: 800, sunlightCost: 25 }
+};
 
-                <!-- Sunlight Shop -->
-                <div>
-                    <h2 class="text-2xl font-bold text-yellow-600 mb-4">Sunlight Shop</h2>
-                    <p class="text-gray-600 mb-6">Use sunlight earned from milestones to buy premium plants!</p>
-                    <div class="space-y-3" id="sunlightShopList"></div>
-                </div>
-            </div>
-        </div>
-    </div>
+const milestones = [
+    { plants: 5, sunlight: 1, description: "First Garden" },
+    { plants: 10, sunlight: 2, description: "Growing Collection" },
+    { plants: 25, sunlight: 5, description: "Plant Enthusiast" },
+    { plants: 50, sunlight: 10, description: "Master Gardener" }
+];
 
-    <script src="shared.js"></script>
-    <script src="gameState.js"></script>
-    <script>
-        // Set active navigation
-        setActiveNav('shop');
+// Utility Functions
+function formatTime(ms) {
+    const seconds = Math.ceil(ms / 1000);
+    if (seconds < 60) return `${seconds}s`;
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}m ${remainingSeconds}s`;
+}
+
+function getRarityColor(rarity) {
+    switch (rarity) {
+        case 'common': return 'text-gray-600';
+        case 'uncommon': return 'text-green-600';
+        case 'rare': return 'text-blue-600';
+        case 'legendary': return 'text-purple-600';
+        case 'mythical': return 'text-yellow-600';
+        default: return 'text-gray-600';
+    }
+}
+
+function getGrowthProgress(slot) {
+    if (!slot || !slot.plantedTime) return 0;
+    const now = Date.now();
+    const elapsed = now - slot.plantedTime;
+    const plant = plantTypes[slot.type] || sunlightShop[slot.type];
+    return Math.min((elapsed / plant.growthTime) * 100, 100);
+}
+
+function isReadyToHarvest(slot) {
+    return slot && getGrowthProgress(slot) >= 100;
+}
+
+function getRemainingTime(slot) {
+    if (!slot || !slot.plantedTime) return 0;
+    const now = Date.now();
+    const plant = plantTypes[slot.type] || sunlightShop[slot.type];
+    const elapsed = now - slot.plantedTime;
+    return Math.max(0, plant.growthTime - elapsed);
+}
+
+function rollForPlant(rarityRates) {
+    const random = Math.random() * 100;
+    let cumulative = 0;
+    
+    for (const [rarity, rate] of Object.entries(rarityRates)) {
+        cumulative += rate;
+        if (random <= cumulative) {
+            const plantsOfRarity = Object.entries(plantTypes).filter(([_, plant]) => plant.rarity === rarity);
+            if (plantsOfRarity.length > 0) {
+                const randomPlant = plantsOfRarity[Math.floor(Math.random() * plantsOfRarity.length)];
+                return randomPlant[0];
+            }
+        }
+    }
+    
+    const commonPlants = Object.entries(plantTypes).filter(([_, plant]) => plant.rarity === 'common');
+    return commonPlants[0][0];
+}
+
+// Navigation helper
+function setActiveNav(activePageName) {
+    const navLinks = {
+        'farm': document.querySelector('a[href="farm.html"]'),
+        'generators': document.querySelector('a[href="generators.html"]'),
+        'collection': document.querySelector('a[href="collection.html"]'),
+        'shop': document.querySelector('a[href="shop.html"]')
+    };
+    
+    Object.entries(navLinks).forEach(([page, link]) => {
+        if (link) {
+            link.classList.toggle('active', page === activePageName);
+        }
+    });
+}
+
+// Reward notification system
+function showReward(rewardType) {
+    const popup = document.createElement('div');
+    popup.className = 'reward-popup';
+    
+    const content = document.createElement('div');
+    content.className = 'reward-content text-center text-white';
+    
+    if (rewardType.startsWith('milestone_')) {
+        content.className += ' gradient-bg-1';
+        content.innerHTML = `
+            <div class="text-2xl font-bold mb-2">MILESTONE!</div>
+            <div class="text-4xl mb-2">⭐</div>
+            <div class="text-xl font-bold">Sunlight Earned!</div>
+        `;
+    } else if (rewardType.startsWith('harvested_')) {
+        const plantType = rewardType.replace('harvested_', '');
+        const plant = plantTypes[plantType] || sunlightShop[plantType];
+        content.className += ' bg-yellow-500';
+        content.innerHTML = `
+            <div class="text-2xl font-bold mb-2">HARVESTED!</div>
+            <div class="text-4xl mb-2">${plant.icon}</div>
+            <div class="text-xl font-bold">+${plant.harvestReward} Nectar</div>
+        `;
+    } else {
+        const plant = plantTypes[rewardType] || sunlightShop[rewardType];
+        content.className += ` ${plant.bgColor}`;
+        content.innerHTML = `
+            <div class="text-2xl font-bold mb-2">NEW PLANT!</div>
+            <div class="text-4xl mb-2">${plant.icon}</div>
+            <div class="text-xl font-bold">${plant.name}</div>
+            <div class="text-sm opacity-90">${plant.rarity.toUpperCase()}</div>
+        `;
+    }
+    
+    popup.appendChild(content);
+    document.body.appendChild(popup);
+    
+    setTimeout(() => {
+        document.body.removeChild(popup);
+    }, 3000);
+}
+
+// Common header update function
+function updateHeader() {
+    const gameState = GameState.get();
+    
+    const nectarDisplay = document.getElementById('nectarDisplay');
+    const sunlightDisplay = document.getElementById('sunlightDisplay');
+    const nectarPerSecDisplay = document.getElementById('nectarPerSecDisplay');
+    
+    if (nectarDisplay) nectarDisplay.textContent = `${Math.floor(gameState.nectar)} Nectar`;
+    if (sunlightDisplay) sunlightDisplay.textContent = `${gameState.sunlight} Sunlight`;
+    if (nectarPerSecDisplay) nectarPerSecDisplay.textContent = `+${GameState.getTotalNectarPerSecond()}/sec`;
+    
+    // Update milestone progress if element exists
+    const milestoneDiv = document.getElementById('milestoneProgress');
+    if (milestoneDiv) {
+        const totalPlants = GameState.getTotalPlantsCollected();
+        const nextMilestone = milestones.find(m => totalPlants < m.plants);
         
-        // Initialize auto-save
-        GameState.startAutoSave();
-
-        function updateShopDisplay() {
-            const state = GameState.get();
+        if (nextMilestone) {
+            milestoneDiv.classList.remove('hidden');
+            const milestoneText = document.getElementById('milestoneText');
+            const milestoneProgressText = document.getElementById('milestoneProgressText');
+            const milestoneBar = document.getElementById('milestoneBar');
             
-            // Update seed packs
-            const seedPacksList = document.getElementById('seedPacksList');
-            seedPacksList.innerHTML = Object.entries(seedPacks).map(([packType, pack]) => {
-                const canAfford = state.nectar >= pack.cost;
-                const isOpening = state.openingPack === packType;
-                
-                return `
-                    <div class="border-2 rounded-lg p-4 transition-all ${canAfford && !state.openingPack ? 'border-green-300 bg-white hover:border-green-500 hover:shadow-md' : 'border-gray-300 bg-gray-100 opacity-60'}">
-                        <div class="flex items-center gap-4 mb-3">
-                            <div class="relative">
-                                <span class="${pack.color} text-3xl">${pack.icon}</span>
-                                ${isOpening ? '<div class="absolute inset-0 flex items-center justify-center"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500"></div></div>' : ''}
-                            </div>
-                            <div class="flex-1">
-                                <h3 class="font-bold text-lg">${pack.name}</h3>
-                                <div class="text-lg font-bold text-blue-600">${pack.cost} Nectar</div>
-                            </div>
-                        </div>
-                        
-                        <div class="text-xs text-gray-500 flex flex-wrap gap-2 mb-3">
-                            ${Object.entries(pack.rarityRates).map(([rarity, rate]) => 
-                                rate > 0 ? `<span class="${getRarityColor(rarity)}">${rarity}: ${rate}%</span>` : ''
-                            ).join('')}
-                        </div>
-                        
-                        <button onclick="openSeedPack('${packType}')" ${!canAfford || state.openingPack ? 'disabled' : ''}
-                                class="w-full py-2 px-4 rounded-lg font-bold transition-all ${canAfford && !state.openingPack ? 'bg-green-500 hover:bg-green-600 text-white cursor-pointer' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}">
-                            ${isOpening ? 'Opening...' : 'Buy Pack'}
-                        </button>
-                    </div>
-                `;
-            }).join('');
-
-            // Update sunlight shop
-            const sunlightShopList = document.getElementById('sunlightShopList');
-            sunlightShopList.innerHTML = Object.entries(sunlightShop).map(([plantKey, plant]) => {
-                const canAfford = state.sunlight >= plant.sunlightCost;
-                const emptySlots = Array.from({length: 12}, (_, i) => i + 1).filter(id => !state.activeSlots[id]);
-                const canPlant = emptySlots.length > 0;
-                
-                return `
-                    <div class="border-2 rounded-lg p-3 transition-all ${canAfford && canPlant ? 'border-yellow-300 bg-white hover:border-yellow-500 hover:shadow-md' : 'border-gray-300 bg-gray-100 opacity-60'}">
-                        <div class="flex items-center gap-3">
-                            <div class="${plant.bgColor} w-12 h-12 rounded-lg flex items-center justify-center">
-                                <span class="${plant.color} text-xl">${plant.icon}</span>
-                            </div>
-                            <div class="flex-1">
-                                <h4 class="font-bold text-md">${plant.name}</h4>
-                                <div class="text-md font-bold text-yellow-600">${plant.sunlightCost} Sunlight</div>
-                                <div class="text-xs text-gray-500">+${plant.harvestReward} nectar • ${formatTime(plant.growthTime)}</div>
-                            </div>
-                            <button onclick="buySunlightPlant('${plantKey}')" ${!canAfford || !canPlant ? 'disabled' : ''}
-                                    class="py-2 px-3 rounded-lg font-bold text-sm transition-all ${canAfford && canPlant ? 'bg-yellow-500 hover:bg-yellow-600 text-white cursor-pointer' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}">
-                                Buy
-                            </button>
-                        </div>
-                        ${!canPlant ? '<div class="text-xs text-red-500 mt-2">No empty garden slots!</div>' : ''}
-                    </div>
-                `;
-            }).join('');
+            if (milestoneText) milestoneText.textContent = `Next Milestone: ${nextMilestone.description}`;
+            if (milestoneProgressText) milestoneProgressText.textContent = `${totalPlants}/${nextMilestone.plants} plants (+${nextMilestone.sunlight} sunlight)`;
+            if (milestoneBar) milestoneBar.style.width = `${Math.min((totalPlants / nextMilestone.plants) * 100, 100)}%`;
+        } else {
+            milestoneDiv.classList.add('hidden');
         }
-
-        function openSeedPack(packType) {
-            if (GameState.openSeedPack(packType)) {
-                updateShopDisplay();
-                updateHeader();
-            }
-        }
-
-        function buySunlightPlant(plantKey) {
-            if (GameState.buySunlightPlant(plantKey)) {
-                updateShopDisplay();
-                updateHeader();
-            }
-        }
-
-        // Event listeners for modal
-        document.getElementById('shopInfoBtn').addEventListener('click', () => {
-            document.getElementById('shopInfoModal').classList.remove('hidden');
-        });
-        document.getElementById('closeShopInfo').addEventListener('click', () => {
-            document.getElementById('shopInfoModal').classList.add('hidden');
-        });
-        document.getElementById('shopInfoModal').addEventListener('click', (e) => {
-            if (e.target === document.getElementById('shopInfoModal')) {
-                document.getElementById('shopInfoModal').classList.add('hidden');
-            }
-        });
-
-        // Update display periodically
-        setInterval(() => {
-            updateShopDisplay();
-            updateHeader();
-        }, 1000);
-
-        // Initial display
-        updateShopDisplay();
-        updateHeader();
-    </script>
-</body>
-</html>
+    }
+}
