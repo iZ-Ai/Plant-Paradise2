@@ -11,7 +11,12 @@
     <div class="max-w-6xl mx-auto p-6">
         <!-- Header -->
         <div class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-green-800 mb-2">Plant Paradise</h1>
+            <div class="flex justify-center items-center gap-4 mb-2">
+                <h1 class="text-4xl font-bold text-green-800">Plant Paradise</h1>
+                <button id="tutorialBtn" class="w-8 h-8 bg-blue-500 hover:bg-blue-600 text-white rounded-full text-sm font-bold transition-all cursor-pointer flex items-center justify-center" title="Tutorial">
+                    ?
+                </button>
+            </div>
             <p class="text-green-600">Collect magical plants from seed packs!</p>
             
             <div class="flex justify-center items-center gap-4 mt-4">
@@ -37,6 +42,34 @@
                 <div class="text-xs text-yellow-600" id="milestoneProgressText"></div>
                 <div class="w-full bg-yellow-200 rounded-full h-2 mt-2">
                     <div id="milestoneBar" class="bg-yellow-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tutorial Modal -->
+        <div id="tutorialModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-xl shadow-2xl p-6 max-w-4xl mx-4 max-h-96 overflow-y-auto">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-green-800">How to Play</h2>
+                    <button id="closeTutorial" class="text-gray-500 hover:text-gray-700 text-2xl font-bold">&times;</button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-green-50 rounded-lg p-4">
+                        <h3 class="font-bold text-green-700 mb-2">🌱 Getting Started</h3>
+                        <p class="text-sm text-gray-600">Click the flower above for instant nectar, then buy seed packs in the Shop!</p>
+                    </div>
+                    <div class="bg-blue-50 rounded-lg p-4">
+                        <h3 class="font-bold text-blue-700 mb-2">⏰ Growing & Harvesting</h3>
+                        <p class="text-sm text-gray-600">Visit the Farm to harvest ready plants for nectar. Different plants have different growth times.</p>
+                    </div>
+                    <div class="bg-purple-50 rounded-lg p-4">
+                        <h3 class="font-bold text-purple-700 mb-2">⚙️ Passive Income</h3>
+                        <p class="text-sm text-gray-600">Build Generators and idle upgrades for automatic nectar production!</p>
+                    </div>
+                    <div class="bg-yellow-50 rounded-lg p-4">
+                        <h3 class="font-bold text-yellow-700 mb-2">⭐ Milestones</h3>
+                        <p class="text-sm text-gray-600">Collect plants to reach milestones and earn Sunlight for premium plants!</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -109,29 +142,6 @@
                 <div class="space-y-4">
                     <h3 class="text-lg font-bold text-purple-700">Idle Upgrades</h3>
                     <div id="idleUpgrades" class="space-y-3"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Game Tips -->
-        <div class="bg-white rounded-xl shadow-lg p-6">
-            <h2 class="text-2xl font-bold text-green-800 mb-4">How to Play</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="bg-green-50 rounded-lg p-4">
-                    <h3 class="font-bold text-green-700 mb-2">🌱 Getting Started</h3>
-                    <p class="text-sm text-gray-600">Click the flower above for instant nectar, then buy seed packs in the Shop!</p>
-                </div>
-                <div class="bg-blue-50 rounded-lg p-4">
-                    <h3 class="font-bold text-blue-700 mb-2">⏰ Growing & Harvesting</h3>
-                    <p class="text-sm text-gray-600">Visit the Farm to harvest ready plants for nectar. Different plants have different growth times.</p>
-                </div>
-                <div class="bg-purple-50 rounded-lg p-4">
-                    <h3 class="font-bold text-purple-700 mb-2">⚙️ Passive Income</h3>
-                    <p class="text-sm text-gray-600">Build Generators and idle upgrades for automatic nectar production!</p>
-                </div>
-                <div class="bg-yellow-50 rounded-lg p-4">
-                    <h3 class="font-bold text-yellow-700 mb-2">⭐ Milestones</h3>
-                    <p class="text-sm text-gray-600">Collect plants to reach milestones and earn Sunlight for premium plants!</p>
                 </div>
             </div>
         </div>
@@ -325,6 +335,17 @@
 
         // Event listeners
         document.getElementById('nectarCollector').addEventListener('click', collectNectar);
+        document.getElementById('tutorialBtn').addEventListener('click', () => {
+            document.getElementById('tutorialModal').classList.remove('hidden');
+        });
+        document.getElementById('closeTutorial').addEventListener('click', () => {
+            document.getElementById('tutorialModal').classList.add('hidden');
+        });
+        document.getElementById('tutorialModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('tutorialModal')) {
+                document.getElementById('tutorialModal').classList.add('hidden');
+            }
+        });
         
         // Update displays every second
         setInterval(updateStatusDisplays, 1000);
