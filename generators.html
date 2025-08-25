@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generators - Plant Paradise</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gradient-to-b from-green-50 to-blue-50 min-h-screen">
+    <div class="max-w-6xl mx-auto p-6">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-green-800 mb-2">Plant Paradise</h1>
+            <div class="flex justify-center items-center gap-4 mt-4">
+                <div class="bg-white rounded-lg px-4 py-2 shadow-md">
+                    <div class="flex items-center gap-2">
+                        <span class="icon text-blue-500">✨</span>
+                        <span class="font-bold text-lg" id="nectarDisplay">50 Nectar</span>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg px-4 py-2 shadow-md">
+                    <div class="flex items-center gap-2">
+                        <span class="icon text-yellow-500">⭐</span>
+                        <span class="font-bold text-lg" id="sunlightDisplay">0 Sunlight</span>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg px-4 py-2 shadow-md">
+                    <span class="font-bold text-lg text-green-600" id="nectarPerSecDisplay">+0/sec</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="bg-white rounded-xl shadow-lg mb-8 p-4">
+            <div class="flex justify-center gap-4">
+                <a href="index.html" class="nav-link">🏠 Home</a>
+                <a href="farm.html" class="nav-link">🌱 Farm</a>
+                <a href="generators.html" class="nav-link active">⚙️ Generators</a>
+                <a href="collection.html" class="nav-link">📚 Collection</a>
+                <a href="shop.html" class="nav-link">🛒 Shop</a>
+            </div>
+        </div>
+
+        <!-- Generators Content -->
+        <div class="bg-white rounded-xl shadow-lg mb-8 p-6">
+            <h2 class="text-2xl font-bold text-purple-800 mb-4">Nectar Generators</h2>
+            <p class="text-gray-600 mb-6">Build generators that automatically produce nectar over time!</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="generatorsList"></div>
+            
+            <div id="generatorSummary" class="mt-8 bg-gradient-to-r from-purple-100 to-blue-100 rounded-xl p-6"></div>
+        </div>
+    </div>
+
+    <script src="shared.js"></script>
+    <script src="gameState.js"></script>
+    <script>
+        // Set active navigation
+        setActiveNav('generators');
+        
+        // Initialize auto-save
+        GameState.startAutoSave();
+
+        function updateGeneratorsDisplay() {
+            const state = GameState.get();
+            const generatorsList = document.getElementById('generatorsList');
+            
+            generatorsList.innerHTML = Object.entries(generatorTypes).map(([genKey, genData]) => {
+                const gen = state.generators[genKey];
+                const currentCost = Math.floor(gen.cost * Math.pow(1.15, gen.level));
+                const canAfford = state.nectar >= currentCost;
+                const nectarPerSec = gen.baseNectar * gen.level;
+                
+                return `
+                    <div class="${genData.bgColor} rounded-xl p-6 border-2 ${canAfford ? 'border-gray-300' : 'border-gray-200'}">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-16 h-16 bg-white rounded-lg flex items-center justify-center shadow-md">
+                                <span class="${genData.color} text-2xl">${genData.icon}</span>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-800">${genData.name}</h3>
+                                <p class="text-sm text-gray-600">${genData.description}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-2 mb-4">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-700 font-medium">Level:</span>
+                                <span class="font-bold text-lg">${gen.level}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-700 font-medium">Production:</span>
+                                <span class="font-bold text-lg text-blue-600">+${nectarPerSec}/sec</span>
+                            </div>
+                            ${gen.level > 0 ? `
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-700 font-medium">Next level:</span>
+                                    <span class="font-bold text-lg text-blue-600">+${gen.baseNectar}/sec</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                        
+                        <button onclick="buyGenerator('${genKey}')" ${!canAfford ? 'disabled' : ''} 
+                                class="w-full py-3 px-4 rounded-lg font-bold text-lg transition-all ${canAfford ? 'bg-purple-600 hover:bg-purple-700 text-white cursor-pointer hover:shadow-md' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}">
+                            ${gen.level === 0 ? 'Build' : 'Upgrade'} - ${currentCost.toLocaleString()} Nectar
+                        </button>
+                    </div>
+                `;
+            }).join('');
+
+            // Update generator summary
+            const summary = document.getElementById('generatorSummary');
+            const activeGenerators = Object.entries(generatorTypes).filter(([genKey]) => state.generators[genKey].level > 0);
+            
+            if (activeGenerators.length > 0) {
+                summary.innerHTML = `
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Generator Summary</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        ${activeGenerators.map(([genKey, genData]) => {
+                            const gen = state.generators[genKey];
+                            const nectarPerSec = gen.baseNectar * gen.level;
+                            return `
+                                <div class="bg-white rounded-lg p-3 text-center">
+                                    <div class="text-sm font-medium text-gray-600">${genData.name}</div>
+                                    <div class="text-lg font-bold text-purple-600">Level ${gen.level}</div>
+                                    <div class="text-sm text-blue-600">+${nectarPerSec}/sec</div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                    <div class="mt-4 text-center">
+                        <div class="text-lg font-bold text-gray-800">
+                            Total Generator Production: <span class="text-purple-600">+${Object.values(state.generators).reduce((sum, gen) => sum + (gen.baseNectar * gen.level), 0)}/sec</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                summary.innerHTML = `
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Generator Summary</h3>
+                    <div class="text-center text-gray-500 py-8">No generators built yet. Purchase your first generator above!</div>
+                `;
+            }
+        }
+
+        function buyGenerator(genType) {
+            if (GameState.buyGenerator(genType)) {
+                updateGeneratorsDisplay();
+                updateHeader();
+            }
+        }
+
+        // Update display periodically
+        setInterval(() => {
+            updateGeneratorsDisplay();
+            updateHeader();
+        }, 1000);
+
+        // Initial display
+        updateGeneratorsDisplay();
+        updateHeader();
+    </script>
+</body>
+</html>
