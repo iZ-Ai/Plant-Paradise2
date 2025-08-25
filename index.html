@@ -186,15 +186,10 @@
 
         function getIdleUpgrades() {
             const state = GameState.get();
-            return state.idleUpgrades || {
-                clickPower: { level: 0 },
-                autoClicker: { level: 0 },
-                flowerPower: { level: 0 }
-            };
+            return state.idleUpgrades;
         }
 
         function updateIdleUpgrades(upgrades) {
-            const state = GameState.get();
             GameState.update({ idleUpgrades: upgrades });
         }
 
