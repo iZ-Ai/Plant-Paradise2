@@ -11,7 +11,12 @@
     <div class="max-w-6xl mx-auto p-6">
         <!-- Header -->
         <div class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-green-800 mb-2">Plant Paradise</h1>
+            <div class="flex justify-center items-center gap-4 mb-2">
+                <h1 class="text-4xl font-bold text-green-800">Plant Paradise</h1>
+                <button id="generatorInfoBtn" class="w-8 h-8 bg-blue-500 hover:bg-blue-600 text-white rounded-full text-sm font-bold transition-all cursor-pointer flex items-center justify-center" title="Generator Summary">
+                    i
+                </button>
+            </div>
             <div class="flex justify-center items-center gap-4 mt-4">
                 <div class="bg-white rounded-lg px-4 py-2 shadow-md">
                     <div class="flex items-center gap-2">
@@ -28,6 +33,17 @@
                 <div class="bg-white rounded-lg px-4 py-2 shadow-md">
                     <span class="font-bold text-lg text-green-600" id="nectarPerSecDisplay">+0/sec</span>
                 </div>
+            </div>
+        </div>
+
+        <!-- Generator Summary Modal -->
+        <div id="generatorInfoModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-xl shadow-2xl p-6 max-w-4xl mx-4 max-h-96 overflow-y-auto">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-gray-800">Generator Summary</h2>
+                    <button id="closeGeneratorInfo" class="text-gray-500 hover:text-gray-700 text-2xl font-bold">&times;</button>
+                </div>
+                <div id="modalGeneratorSummary"></div>
             </div>
         </div>
 
@@ -48,8 +64,6 @@
             <p class="text-gray-600 mb-6">Build generators that automatically produce nectar over time!</p>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="generatorsList"></div>
-            
-            <div id="generatorSummary" class="mt-8 bg-gradient-to-r from-purple-100 to-blue-100 rounded-xl p-6"></div>
         </div>
     </div>
 
@@ -109,19 +123,22 @@
                 `;
             }).join('');
 
-            // Update generator summary
-            const summary = document.getElementById('generatorSummary');
+            // Update modal summary content
+            updateModalSummary(state);
+        }
+
+        function updateModalSummary(state) {
+            const modalSummary = document.getElementById('modalGeneratorSummary');
             const activeGenerators = Object.entries(generatorTypes).filter(([genKey]) => state.generators[genKey].level > 0);
             
             if (activeGenerators.length > 0) {
-                summary.innerHTML = `
-                    <h3 class="text-xl font-bold text-gray-800 mb-3">Generator Summary</h3>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                modalSummary.innerHTML = `
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                         ${activeGenerators.map(([genKey, genData]) => {
                             const gen = state.generators[genKey];
                             const nectarPerSec = gen.baseNectar * gen.level;
                             return `
-                                <div class="bg-white rounded-lg p-3 text-center">
+                                <div class="bg-gray-50 rounded-lg p-3 text-center">
                                     <div class="text-sm font-medium text-gray-600">${genData.name}</div>
                                     <div class="text-lg font-bold text-purple-600">Level ${gen.level}</div>
                                     <div class="text-sm text-blue-600">+${nectarPerSec}/sec</div>
@@ -129,16 +146,15 @@
                             `;
                         }).join('')}
                     </div>
-                    <div class="mt-4 text-center">
+                    <div class="text-center bg-gradient-to-r from-purple-100 to-blue-100 rounded-lg p-4">
                         <div class="text-lg font-bold text-gray-800">
                             Total Generator Production: <span class="text-purple-600">+${Object.values(state.generators).reduce((sum, gen) => sum + (gen.baseNectar * gen.level), 0)}/sec</span>
                         </div>
                     </div>
                 `;
             } else {
-                summary.innerHTML = `
-                    <h3 class="text-xl font-bold text-gray-800 mb-3">Generator Summary</h3>
-                    <div class="text-center text-gray-500 py-8">No generators built yet. Purchase your first generator above!</div>
+                modalSummary.innerHTML = `
+                    <div class="text-center text-gray-500 py-8">No generators built yet. Purchase your first generator to see summary!</div>
                 `;
             }
         }
@@ -149,6 +165,19 @@
                 updateHeader();
             }
         }
+
+        // Event listeners for modal
+        document.getElementById('generatorInfoBtn').addEventListener('click', () => {
+            document.getElementById('generatorInfoModal').classList.remove('hidden');
+        });
+        document.getElementById('closeGeneratorInfo').addEventListener('click', () => {
+            document.getElementById('generatorInfoModal').classList.add('hidden');
+        });
+        document.getElementById('generatorInfoModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('generatorInfoModal')) {
+                document.getElementById('generatorInfoModal').classList.add('hidden');
+            }
+        });
 
         // Update display periodically
         setInterval(() => {
