@@ -102,14 +102,20 @@
             if (Object.keys(state.plantCollection).length === 0) {
                 collectionGrid.innerHTML = '<p class="text-gray-500 text-center py-8 col-span-full">No plants collected yet. Open some seed packs!</p>';
             } else {
+                // First count all rarities
+                Object.entries(state.plantCollection).forEach(([type, count]) => {
+                    const plant = plantTypes[type] || sunlightShop[type];
+                    if (plant) {
+                        rarityCounts[plant.rarity] += count;
+                    }
+                });
+                
+                // Then filter and display
                 const filteredPlants = Object.entries(state.plantCollection)
                     .sort(([,a], [,b]) => b - a)
                     .filter(([type]) => {
                         const plant = plantTypes[type] || sunlightShop[type];
                         if (!plant) return false;
-                        
-                        // Count for stats
-                        rarityCounts[plant.rarity] += 1;
                         
                         // Filter by current selection
                         return currentFilter === 'all' || plant.rarity === currentFilter;
@@ -146,8 +152,16 @@
                 btn.classList.add('bg-gray-200', 'text-gray-700');
             });
             
-            event.target.classList.add('active', 'bg-blue-500', 'text-white');
-            event.target.classList.remove('bg-gray-200', 'text-gray-700');
+            // Find the clicked button and make it active
+            const clickedButton = Array.from(document.querySelectorAll('.filter-btn')).find(btn => 
+                btn.textContent.toLowerCase().includes(rarity.toLowerCase()) || 
+                (rarity === 'all' && btn.textContent === 'All')
+            );
+            
+            if (clickedButton) {
+                clickedButton.classList.add('active', 'bg-blue-500', 'text-white');
+                clickedButton.classList.remove('bg-gray-200', 'text-gray-700');
+            }
             
             updateCollectionDisplay();
         }
