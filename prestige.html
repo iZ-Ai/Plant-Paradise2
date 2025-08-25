@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prestige - Plant Paradise</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gradient-to-b from-purple-50 to-pink-50 min-h-screen">
+    <div class="max-w-6xl mx-auto p-6">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-purple-800 mb-2">Plant Paradise - Prestige</h1>
+            <div class="flex justify-center items-center gap-4 mt-4">
+                <div class="bg-white rounded-lg px-4 py-2 shadow-md">
+                    <div class="flex items-center gap-2">
+                        <span class="icon text-blue-500">✨</span>
+                        <span class="font-bold text-lg" id="nectarDisplay">50 Nectar</span>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg px-4 py-2 shadow-md">
+                    <div class="flex items-center gap-2">
+                        <span class="icon text-yellow-500">⭐</span>
+                        <span class="font-bold text-lg" id="sunlightDisplay">0 Sunlight</span>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg px-4 py-2 shadow-md">
+                    <div class="flex items-center gap-2">
+                        <span class="icon text-purple-500">💎</span>
+                        <span class="font-bold text-lg" id="prestigePointsDisplay">0 Prestige Points</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="bg-white rounded-xl shadow-lg mb-8 p-4">
+            <div class="flex justify-center gap-4">
+                <a href="index.html" class="nav-link">🏠 Home</a>
+                <a href="farm.html" class="nav-link">🌱 Farm</a>
+                <a href="generators.html" class="nav-link">⚙️ Generators</a>
+                <a href="collection.html" class="nav-link">📚 Collection</a>
+                <a href="shop.html" class="nav-link">🛒 Shop</a>
+                <a href="prestige.html" class="nav-link active">💎 Prestige</a>
+            </div>
+        </div>
+
+        <!-- Prestige Reset -->
+        <div class="bg-white rounded-xl shadow-lg mb-8 p-6">
+            <h2 class="text-2xl font-bold text-purple-800 mb-4">Prestige Reset</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-6">
+                    <h3 class="text-xl font-bold text-purple-700 mb-4">Reset Progress</h3>
+                    <p class="text-gray-600 mb-4">Reset your game progress to gain permanent bonuses and prestige points!</p>
+                    
+                    <div class="space-y-3 mb-6">
+                        <div class="flex justify-between">
+                            <span>Required Nectar:</span>
+                            <span class="font-bold">1,000,000</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Current Nectar:</span>
+                            <span class="font-bold" id="currentNectarAmount">0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Prestige Points Gained:</span>
+                            <span class="font-bold text-purple-600" id="prestigeGainAmount">0</span>
+                        </div>
+                    </div>
+
+                    <button id="prestigeResetBtn" class="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed">
+                        Prestige Reset
+                    </button>
+                </div>
+
+                <div class="bg-red-50 border border-red-200 rounded-lg p-6">
+                    <h3 class="text-lg font-bold text-red-700 mb-3">⚠️ Warning</h3>
+                    <ul class="text-sm text-red-600 space-y-2">
+                        <li>• All nectar will be reset to 50</li>
+                        <li>• All plants will be removed</li>
+                        <li>• All generators will be reset to level 0</li>
+                        <li>• All idle upgrades will be reset</li>
+                        <li>• Plant collection will be cleared</li>
+                        <li>• Sunlight and prestige upgrades are kept</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prestige Upgrades -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-2xl font-bold text-purple-800 mb-4">Prestige Upgrades</h2>
+            <p class="text-gray-600 mb-6">Spend prestige points on permanent upgrades that persist through resets!</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="prestigeUpgrades"></div>
+        </div>
+    </div>
+
+    <script src="shared.js"></script>
+    <script src="gameState.js"></script>
+    <script>
+        // Set active navigation
+        setActiveNav('prestige');
+        
+        // Initialize auto-save
+        GameState.startAutoSave();
+
+        // Prestige upgrade definitions
+        const prestigeUpgrades = {
+            nectarMultiplier: {
+                name: 'Nectar Multiplier',
+                description: 'Increases all nectar income by 25%',
+                baseCost: 1,
+                maxLevel: 10,
+                icon: '💰',
+                effect: 'Multiplies all nectar income'
+            },
+            clickBoost: {
+                name: 'Click Boost',
+                description: 'Increases click power by 50%',
+                baseCost: 2,
+                maxLevel: 8,
+                icon: '👆',
+                effect: 'Boosts manual clicking rewards'
+            },
+            generatorBoost: {
+                name: 'Generator Boost',
+                description: 'Increases generator efficiency by 30%',
+                baseCost: 3,
+                maxLevel: 6,
+                icon: '⚙️',
+                effect: 'Boosts all generator production'
+            },
+            plantGrowth: {
+                name: 'Fast Growth',
+                description: 'Reduces plant growth time by 15%',
+                baseCost: 2,
+                maxLevel: 8,
+                icon: '🌱',
+                effect: 'Plants grow faster'
+            },
+            autoHarvest: {
+                name: 'Auto Harvest',
+                description: 'Automatically harvest plants when ready',
+                baseCost: 10,
+                maxLevel: 1,
+                icon: '🤖',
+                effect: 'No more manual harvesting needed'
+            },
+            sunlightBonus: {
+                name: 'Sunlight Bonus',
+                description: 'Gain 1 extra sunlight from milestones',
+                baseCost: 5,
+                maxLevel: 5,
+                icon: '⭐',
+                effect: 'More sunlight from achievements'
+            }
+        };
+
+        function getPrestigeUpgrades() {
+            const state = GameState.get();
+            return state.prestigeUpgrades || Object.keys(prestigeUpgrades).reduce((acc, key) => {
+                acc[key] = { level: 0 };
+                return acc;
+            }, {});
+        }
+
+        function calculatePrestigeGain(nectar) {
+            return Math.floor(nectar / 1000000);
+        }
+
+        function getUpgradeCost(upgradeKey, currentLevel) {
+            const upgrade = prestigeUpgrades[upgradeKey];
+            return upgrade.baseCost + (currentLevel * Math.ceil(upgrade.baseCost * 0.5));
+        }
+
+        function canAffordUpgrade(upgradeKey, currentLevel, prestigePoints) {
+            const cost = getUpgradeCost(upgradeKey, currentLevel);
+            return prestigePoints >= cost;
+        }
+
+        function buyPrestigeUpgrade(upgradeKey) {
+            const state = GameState.get();
+            const upgrades = getPrestigeUpgrades();
+            const currentLevel = upgrades[upgradeKey].level;
+            const cost = getUpgradeCost(upgradeKey, currentLevel);
+            const prestigePoints = state.prestigePoints || 0;
+
+            if (canAffordUpgrade(upgradeKey, currentLevel, prestigePoints) && 
+                currentLevel < prestigeUpgrades[upgradeKey].maxLevel) {
+                
+                upgrades[upgradeKey].level++;
+                GameState.update({
+                    prestigePoints: prestigePoints - cost,
+                    prestigeUpgrades: upgrades
+                });
+                
+                updatePrestigeDisplay();
+                showFloatingText('Upgrade Purchased!', 'text-purple-600');
+            }
+        }
+
+        function performPrestigeReset() {
+            const state = GameState.get();
+            if (state.nectar < 1000000) return;
+
+            const prestigeGain = calculatePrestigeGain(state.nectar);
+            const currentPrestigePoints = state.prestigePoints || 0;
+
+            // Keep only prestige-related data and sunlight
+            const newState = {
+                ...GameState.defaultState,
+                sunlight: state.sunlight,
+                prestigePoints: currentPrestigePoints + prestigeGain,
+                prestigeUpgrades: state.prestigeUpgrades || {}
+            };
+
+            GameState.save(newState);
+            showFloatingText(`+${prestigeGain} Prestige Points!`, 'text-purple-600');
+            updatePrestigeDisplay();
+            updateHeader();
+        }
+
+        function updatePrestigeDisplay() {
+            const state = GameState.get();
+            const prestigePoints = state.prestigePoints || 0;
+            const prestigeGain = calculatePrestigeGain(state.nectar);
+            const canPrestige = state.nectar >= 1000000;
+
+            // Update header displays
+            document.getElementById('currentNectarAmount').textContent = Math.floor(state.nectar).toLocaleString();
+            document.getElementById('prestigeGainAmount').textContent = prestigeGain;
+            document.getElementById('prestigePointsDisplay').textContent = prestigePoints;
+
+            // Update prestige button
+            const prestigeBtn = document.getElementById('prestigeResetBtn');
+            prestigeBtn.disabled = !canPrestige;
+            if (canPrestige) {
+                prestigeBtn.textContent = `Prestige Reset (+${prestigeGain} Points)`;
+            } else {
+                prestigeBtn.textContent = `Need ${(1000000 - state.nectar).toLocaleString()} more nectar`;
+            }
+
+            // Update upgrades
+            const upgradesContainer = document.getElementById('prestigeUpgrades');
+            const upgrades = getPrestigeUpgrades();
+
+            upgradesContainer.innerHTML = Object.entries(prestigeUpgrades).map(([key, upgrade]) => {
+                const currentLevel = upgrades[key].level;
+                const cost = getUpgradeCost(key, currentLevel);
+                const canAfford = canAffordUpgrade(key, currentLevel, prestigePoints);
+                const maxedOut = currentLevel >= upgrade.maxLevel;
+
+                return `
+                    <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-4 border">
+                        <div class="text-center mb-3">
+                            <div class="text-3xl mb-2">${upgrade.icon}</div>
+                            <h3 class="font-bold text-lg">${upgrade.name}</h3>
+                            <p class="text-sm text-gray-600">${upgrade.description}</p>
+                            <p class="text-xs text-purple-600 mt-1">${upgrade.effect}</p>
+                        </div>
+                        
+                        <div class="text-center mb-3">
+                            <div class="text-sm font-medium">Level ${currentLevel}/${upgrade.maxLevel}</div>
+                            <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                                <div class="bg-purple-500 h-2 rounded-full transition-all" 
+                                     style="width: ${(currentLevel / upgrade.maxLevel) * 100}%"></div>
+                            </div>
+                        </div>
+                        
+                        <button onclick="buyPrestigeUpgrade('${key}')" 
+                                ${!canAfford || maxedOut ? 'disabled' : ''}
+                                class="w-full py-2 px-4 rounded-lg font-bold text-sm transition-all ${
+                                    maxedOut ? 'bg-green-200 text-green-700 cursor-default' :
+                                    canAfford ? 'bg-purple-500 hover:bg-purple-600 text-white cursor-pointer' :
+                                    'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                }">
+                            ${maxedOut ? 'MAXED' : `${cost} Prestige Points`}
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function showFloatingText(text, colorClass = 'text-green-600') {
+            const floatingText = document.createElement('div');
+            floatingText.className = `fixed top-1/4 left-1/2 transform -translate-x-1/2 pointer-events-none font-bold text-xl ${colorClass} animate-bounce z-50`;
+            floatingText.textContent = text;
+            document.body.appendChild(floatingText);
+            
+            setTimeout(() => {
+                if (floatingText.parentNode) {
+                    floatingText.parentNode.removeChild(floatingText);
+                }
+            }, 2000);
+        }
+
+        // Event listeners
+        document.getElementById('prestigeResetBtn').addEventListener('click', performPrestigeReset);
+
+        // Update displays every second
+        setInterval(() => {
+            updatePrestigeDisplay();
+            updateHeader();
+        }, 1000);
+
+        // Initial display
+        updatePrestigeDisplay();
+        updateHeader();
+    </script>
+</body>
+</html>
