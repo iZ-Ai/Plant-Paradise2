@@ -316,32 +316,6 @@
             updateIdleDisplay();
         }
 
-        // Auto-clicker functionality
-        setInterval(() => {
-            const autoRate = parseFloat(getAutoClickRate());
-            if (autoRate > 0) {
-                const reward = Math.floor(getClickReward() * autoRate);
-                if (reward > 0) {
-                    const state = GameState.get();
-                    GameState.update({ nectar: state.nectar + reward });
-                }
-            }
-        }, 1000);
-
-        // Event listeners
-        document.getElementById('nectarCollector').addEventListener('click', collectNectar);
-        document.getElementById('tutorialBtn').addEventListener('click', () => {
-            document.getElementById('tutorialModal').classList.remove('hidden');
-        });
-        document.getElementById('closeTutorial').addEventListener('click', () => {
-            document.getElementById('tutorialModal').classList.add('hidden');
-        });
-        document.getElementById('tutorialModal').addEventListener('click', (e) => {
-            if (e.target === document.getElementById('tutorialModal')) {
-                document.getElementById('tutorialModal').classList.add('hidden');
-            }
-        });
-        
         // Update displays every second
         setInterval(updateStatusDisplays, 1000);
         
