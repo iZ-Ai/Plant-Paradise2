@@ -131,4 +131,42 @@
             }
             
             // Update rarity counts
-            document.
+            document.getElementById('commonCount').textContent = rarityCounts.common;
+            document.getElementById('uncommonCount').textContent = rarityCounts.uncommon;
+            document.getElementById('rareCount').textContent = rarityCounts.rare;
+            document.getElementById('legendaryCount').textContent = rarityCounts.legendary + rarityCounts.mythical;
+        }
+
+        function filterCollection(rarity) {
+            currentFilter = rarity;
+            
+            // Update active filter button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active', 'bg-blue-500', 'text-white');
+                btn.classList.add('bg-gray-200', 'text-gray-700');
+            });
+            
+            event.target.classList.add('active', 'bg-blue-500', 'text-white');
+            event.target.classList.remove('bg-gray-200', 'text-gray-700');
+            
+            updateCollectionDisplay();
+        }
+
+        // Update display periodically
+        setInterval(() => {
+            updateCollectionDisplay();
+            updateHeader();
+        }, 1000);
+
+        // Initial display
+        updateCollectionDisplay();
+        updateHeader();
+        
+        // Force update header immediately to show current values
+        const state = GameState.get();
+        document.getElementById('nectarDisplay').textContent = `${Math.floor(state.nectar)} Nectar`;
+        document.getElementById('sunlightDisplay').textContent = `${state.sunlight} Sunlight`;
+        document.getElementById('nectarPerSecDisplay').textContent = `+${GameState.getTotalNectarPerSecond()}/sec`;
+    </script>
+</body>
+</html>
